@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>روبوت Andalus AI</title>
+<style>
+:root{--blue:#1677d2;--navy:#12345a;--sky:#73d4ff;--gold:#e9bd61;--ink:#18324e}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Tahoma,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 20% 10%,#e9f7ff,transparent 35%),linear-gradient(135deg,#f8fbff,#eaf4ff);overflow:hidden}
+.demo{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}
+.panel{max-width:620px;background:#ffffffd9;border:1px solid #d8eaff;border-radius:28px;padding:32px;box-shadow:0 18px 60px #1a5b9120}
+h1{margin:0 0 12px;color:var(--navy)}p{line-height:1.9;margin:0;color:#58708a}
+.pill{display:inline-flex;gap:8px;align-items:center;margin-top:20px;background:#e4f5ff;border:1px solid #bce7ff;border-radius:99px;padding:8px 14px;color:#1464a5;font-size:13px}
+#ai-buddy{position:fixed;z-index:9999;left:22px;bottom:22px;width:94px;height:116px;display:grid;place-items:center;cursor:grab;touch-action:none;user-select:none;filter:drop-shadow(0 12px 14px #174b7c30);animation:roam 13s ease-in-out infinite}
+#ai-buddy:active{cursor:grabbing}
+.robot{width:78px;height:96px;position:relative;animation:bob .9s ease-in-out infinite}
+.antenna{position:absolute;top:0;left:36px;width:6px;height:13px;background:var(--blue);border-radius:8px}
+.antenna:before{content:"";position:absolute;top:-5px;left:-3px;width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px #e9bd6180}
+.head{position:absolute;top:12px;left:4px;width:70px;height:49px;border:3px solid #c6eaff;border-radius:21px 21px 17px 17px;background:linear-gradient(145deg,#fff,#dff4ff);box-shadow:inset 0 -5px 0 #c4e8ff}
+.ear{position:absolute;top:29px;width:9px;height:20px;border-radius:6px;background:var(--blue);border:2px solid #b6e5ff}
+.ear.l{left:0}.ear.r{right:0}
+.eye{position:absolute;top:17px;width:13px;height:16px;border-radius:50%;background:#087bd1;box-shadow:0 0 10px #54caff80;animation:blink 4s infinite}
+.eye.l{left:15px}.eye.r{right:15px}
+.eye:after{content:"";position:absolute;top:3px;left:3px;width:4px;height:5px;border-radius:50%;background:white}
+.mouth{position:absolute;left:27px;bottom:6px;width:14px;height:6px;border-bottom:3px solid #2378b9;border-radius:0 0 10px 10px}
+.body{position:absolute;top:64px;left:17px;width:44px;height:27px;border-radius:12px 12px 10px 10px;background:linear-gradient(140deg,#fff,#bfe7ff);border:2px solid #9bd7ff}
+.core{position:absolute;top:8px;left:14px;width:12px;height:8px;border-radius:5px;background:var(--gold);box-shadow:0 0 9px #e9bd61}
+.arm{position:absolute;top:68px;width:10px;height:23px;border-radius:8px;background:#70c7f4;border:2px solid #c4eaff;transform-origin:top center}
+.arm.l{left:8px;animation:wave .75s ease-in-out infinite alternate}
+.arm.r{right:8px;animation:wave .75s ease-in-out infinite alternate-reverse}
+.leg{position:absolute;top:86px;width:12px;height:10px;border-radius:4px 4px 7px 7px;background:var(--blue);border:1px solid #a8e0ff}
+.leg.l{left:25px;animation:step .45s ease-in-out infinite alternate}
+.leg.r{right:25px;animation:step .45s ease-in-out infinite alternate-reverse}
+.speech{position:absolute;bottom:108px;left:-12px;white-space:nowrap;background:white;border:1px solid #cce9ff;color:#155b92;padding:7px 11px;border-radius:13px 13px 3px 13px;font-size:12px;font-weight:bold;box-shadow:0 5px 20px #0b4c7e14;animation:talk 3.5s infinite}
+.speech:after{content:"";position:absolute;bottom:-6px;left:18px;width:10px;height:10px;background:white;border-right:1px solid #cce9ff;border-bottom:1px solid #cce9ff;transform:rotate(45deg)}
+.chat{position:fixed;z-index:10000;left:22px;bottom:145px;width:min(340px,calc(100vw - 32px));background:white;border:1px solid #d5eaff;border-radius:20px;box-shadow:0 18px 55px #143d652e;overflow:hidden;display:none}
+.chat.open{display:block;animation:pop .2s ease-out}
+.chat-head{background:linear-gradient(110deg,#12345a,#1677d2);color:white;padding:15px 17px;display:flex;align-items:center;justify-content:space-between}
+.chat-head strong{font-size:15px}.chat-head small{display:block;opacity:.8;margin-top:4px;font-size:11px}
+.close{border:0;background:#ffffff25;color:white;border-radius:9px;width:30px;height:30px;font-size:20px;cursor:pointer}
+.chat-body{padding:18px;min-height:100px}.bubble{background:#edf7ff;border-radius:14px 14px 14px 4px;padding:12px;font-size:13px;line-height:1.8}
+.chat-foot{border-top:1px solid #e8f0f8;padding:10px 14px;color:#7b8da2;font-size:11px}
+.tools{position:fixed;right:16px;bottom:16px;display:flex;gap:8px}
+.tools button{border:1px solid #cfe3f7;background:#ffffffdf;color:#285579;border-radius:12px;padding:9px 12px;cursor:pointer;font-size:12px}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
+@keyframes wave{from{transform:rotate(22deg)}to{transform:rotate(-25deg)}}
+@keyframes step{from{transform:rotate(-12deg) translateY(0)}to{transform:rotate(12deg) translateY(-2px)}}
+@keyframes blink{0%,45%,48%,100%{transform:scaleY(1)}46%,47%{transform:scaleY(.12)}}
+@keyframes talk{0%,72%,100%{opacity:1;transform:translateY(0)}80%,92%{opacity:.4;transform:translateY(-3px)}}
+@keyframes roam{0%,100%{left:22px}25%{left:calc(100vw - 118px)}50%{left:calc(100vw - 118px);transform:translateY(-18px)}75%{left:22px;transform:translateY(0)}}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:520px){#ai-buddy{transform:scale(.88);transform-origin:bottom left}.panel{padding:25px 20px}.tools{right:10px;bottom:10px}}
+@media(prefers-reduced-motion:reduce){#ai-buddy,.robot,.eye,.arm,.leg,.speech{animation:none!important}}
+</style>
+</head>
+<body>
+<main class="demo">
+  <section class="panel">
+    <h1>مرحبًا بك في Andalus AI 🤖</h1>
+    <p>مساعدك الذكي لمركز الأندلس للتدريب. الروبوت الصغير يتحرك على الشاشة، اضغط عليه لفتح نافذة المساعد.</p>
+    <span class="pill">● جاهز للمساعدة · تصميم تجريبي</span>
+  </section>
+</main>
+<div id="ai-buddy" role="button" tabindex="0" aria-label="افتح مساعد Andalus AI" title="اضغط للتحدث مع Andalus AI">
+  <div class="speech">أهلًا! أساعدك؟</div>
+  <div class="robot" aria-hidden="true">
+    <div class="antenna"></div><div class="ear l"></div><div class="ear r"></div>
+    <div class="head"><div class="eye l"></div><div class="eye r"></div><div class="mouth"></div></div>
+    <div class="arm l"></div><div class="arm r"></div><div class="body"><div class="core"></div></div>
+    <div class="leg l"></div><div class="leg r"></div>
+  </div>
+</div>
+<section class="chat" id="chat" aria-live="polite">
+  <header class="chat-head"><div><strong>Andalus AI</strong><small>المساعد الذكي لمركز الأندلس</small></div><button class="close" id="close" aria-label="إغلاق">×</button></header>
+  <div class="chat-body"><div class="bubble">أهلًا بيك 👋<br>أنا روبوت الأندلس! التصميم جاهز، وربط المحادثة الفعلية يحتاج توصيله بواجهة الـ API الخاصة بالمشروع.</div></div>
+  <div class="chat-foot">واجهة تجريبية — لم يتم إرسال أي بيانات</div>
+</section>
+<div class="tools"><button id="motion">إيقاف الحركة</button><button id="hide">إخفاء الروبوت</button></div>
+<script>
+const buddy=document.getElementById('ai-buddy'),chat=document.getElementById('chat'),closeBtn=document.getElementById('close'),motion=document.getElementById('motion'),hide=document.getElementById('hide');
+function toggleChat(){chat.classList.toggle('open')}
+buddy.addEventListener('click',toggleChat);buddy.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleChat()}});
+closeBtn.addEventListener('click',()=>chat.classList.remove('open'));
+motion.addEventListener('click',()=>{const paused=buddy.style.animationPlayState==='paused';buddy.style.animationPlayState=paused?'running':'paused';buddy.querySelectorAll('.robot,.eye,.arm,.leg,.speech').forEach(el=>el.style.animationPlayState=paused?'running':'paused');motion.textContent=paused?'إيقاف الحركة':'تشغيل الحركة'});
+hide.addEventListener('click',()=>{buddy.style.display='none';chat.classList.remove('open');const b=document.createElement('button');b.textContent='إظهار الروبوت 🤖';b.style.cssText='position:fixed;left:16px;bottom:16px;z-index:10001;border:0;border-radius:14px;padding:12px 16px;background:#1677d2;color:white;cursor:pointer';b.onclick=()=>{buddy.style.display='grid';b.remove()};document.body.appendChild(b)});
+</script>
+</body>
+</html>
